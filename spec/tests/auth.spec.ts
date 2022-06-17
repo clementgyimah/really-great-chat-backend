@@ -5,7 +5,7 @@ import supertest, { SuperTest, Test, Response } from 'supertest';
 import app from '@server';
 import userRepo from '@repos/user-repo';
 import User, { UserRoles } from '@models/user-model';
-import { cookieProps, p as paths } from '@routes/auth-router';
+import { cookieProps } from "../../src/common/cookie";
 import { pErr } from '@shared/functions';
 import { pwdSaltRounds } from 'spec/support/login-agent';
 import { UnauthorizedError } from '@shared/errors';
@@ -17,8 +17,8 @@ type TReqBody = string | object | undefined;
 describe('auth-router', () => {
 
     const authPath = '/api/auth';
-    const loginPath = `${authPath}${paths.login}`;
-    const logoutPath = `${authPath}${paths.logout}`;
+    const loginPath = `${authPath}${'login'}`;
+    const logoutPath = `${authPath}${'logout'}`;
     const { BAD_REQUEST, OK, UNAUTHORIZED } = StatusCodes;
 
     let agent: SuperTest<Test>;
