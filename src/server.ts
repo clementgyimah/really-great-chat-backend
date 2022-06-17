@@ -35,9 +35,30 @@ if (process.env.NODE_ENV === "development") {
 if (process.env.NODE_ENV === "production") {
   app.use(helmet());
 }
+// Add AuthO
+// secret personally generated with openssl
+const config = {
+  authRequired: true,
+  auth0Logout: true,
+  secret: "95a49970a0b5acf6f60fa7f7487d95e5b76e1e1f70eec4f674136319ca79af85",
+  baseURL:
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:5000"
+      : "https://really-great-chat-backend.herokuapp.com/",
+  clientID: "F8EUSeKUVlu8JYfLQ319aiJA7rT9aRvl",
+  issuerBaseURL: "https://dev-fs4kgega.us.auth0.com",
+};
+
+// Auth0 router attaches /login, /logout, and /callback routes to the baseURL
+app.use(auth(config));
 
 // Add APIs
 app.use("/api", BaseRouter);
+
+// req.isAuthenticated is provided from the auth router
+app.get("/", (req, res) => {
+    res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
+  });
 
 // Error handling
 app.use(
@@ -51,25 +72,6 @@ app.use(
     });
   }
 );
-
-// Add AuthO
-// secret personally generated with openssl
-const config = {
-  authRequired: false,
-  auth0Logout: true,
-  secret: "95a49970a0b5acf6f60fa7f7487d95e5b76e1e1f70eec4f674136319ca79af85",
-  baseURL: "http://localhost:3000",
-  clientID: "F8EUSeKUVlu8JYfLQ319aiJA7rT9aRvl",
-  issuerBaseURL: "https://dev-fs4kgega.us.auth0.com",
-};
-
-// Auth0 router attaches /login, /logout, and /callback routes to the baseURL
-app.use(auth(config));
-
-// req.isAuthenticated is provided from the auth router
-app.get("/", (req, res) => {
-  res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
-});
 
 /************************************************************************************
  *                              Serve front-end content
