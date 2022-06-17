@@ -89,6 +89,9 @@
       ],
       "@customTypes/*": [
         "src/customTypes/*"
+      ],
+      "@common/*": [
+        "src/common/*"
       ]
     },
     "useUnknownInCatchVariables": false
