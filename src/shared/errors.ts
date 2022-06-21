@@ -54,12 +54,12 @@ export class RoomNotFoundError extends CustomError {
     }
 }
 
-export class UserAlreadyExist extends CustomError {
+export class FirebaseNoDataError extends CustomError {
 
-    public static readonly Msg = 'A user exist already';
-    public static readonly HttpStatus = HttpStatusCodes.CONFLICT;
+    public static readonly Msg = 'No data returned from firebase';
+    public static readonly HttpStatus = HttpStatusCodes.INTERNAL_SERVER_ERROR;
 
     constructor() {
-        super(UserAlreadyExist.Msg, UserAlreadyExist.HttpStatus);
+        super(FirebaseNoDataError.Msg, FirebaseNoDataError.HttpStatus);
     }
 }

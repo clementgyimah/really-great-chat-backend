@@ -6,7 +6,7 @@ import helmet from "helmet";
 import StatusCodes from "http-status-codes";
 import { Server as SocketIo } from "socket.io";
 import express, { NextFunction, Request, Response } from "express";
-import cors from 'cors';
+import cors from "cors";
 
 import "express-async-errors";
 
@@ -14,8 +14,15 @@ import BaseRouter from "./routes/api";
 import logger from "jet-logger";
 import { CustomError } from "@shared/errors";
 import { cookieProps } from "./common/cookie";
+// import {expressjwt as jwt} from 'express-jwt';
+// import jwks from 'jwks-rsa'
 
-import { auth } from "express-openid-connect";
+import { initializeApp } from "firebase/app";
+import authRouter from "@routes/auth-router";
+import { IUser } from "./customTypes";
+const { OK } = StatusCodes;
+
+// import { auth } from "express-openid-connect";
 
 const app = express();
 
@@ -26,7 +33,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(cookieProps.secret));
-app.use(cors())
+app.use(cors());
 
 // Show routes called in console during development
 if (process.env.NODE_ENV === "development") {
@@ -37,27 +44,29 @@ if (process.env.NODE_ENV === "development") {
 if (process.env.NODE_ENV === "production") {
   app.use(helmet());
 }
-// Add AuthO
-// secret personally generated with openssl
-const config = {
-  authRequired: true,
-  auth0Logout: true,
-  secret: "95a49970a0b5acf6f60fa7f7487d95e5b76e1e1f70eec4f674136319ca79af85",
-  baseURL:
-    process.env.NODE_ENV === "development"
-      ? "http://localhost:5000"
-      : "https://really-great-chat-backend.herokuapp.com/",
-  clientID: "F8EUSeKUVlu8JYfLQ319aiJA7rT9aRvl",
-  issuerBaseURL: "https://dev-fs4kgega.us.auth0.com",
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCLFqZl2Wz_teKMR8v7SrmgIayhZ7iue8g",
+  authDomain: "really-great-chat.firebaseapp.com",
+  projectId: "really-great-chat",
+  storageBucket: "really-great-chat.appspot.com",
+  messagingSenderId: "640428196643",
+  appId: "1:640428196643:web:8157d8806309efe6e1c296",
+  measurementId: "G-L62GS3L6NR",
+  databaseURL:
+    // eslint-disable-next-line max-len
+    "https://really-great-chat-default-rtdb.firebaseio.com",
 };
 
-// Auth0 router attaches /login, /logout, and /callback routes to the baseURL
-app.use(auth(config));
+// Initialize Firebase
+initializeApp(firebaseConfig);
 
-// req.isAuthenticated is provided from the auth router
-app.get("/", (req, res) => {
-  res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
+app.get("/", (_: Request, res: Response) => {
+  res.status(OK).send("Welcome to the Great Chat API");
 });
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+app.use("/auth", authRouter);
 
 // Add APIs
 app.use("/api", BaseRouter);
@@ -90,9 +99,13 @@ app.use(express.static(staticDir));
  ***********************************************************************************/
 
 const server = http.createServer(app);
-const io = new SocketIo(server);
+const io = new SocketIo(server, {
+  cors: {
+    origin: "http://localhost:3000",
+  },
+});
 
-io.sockets.on("connect", () => {
+io.on("connection", () => {
   return app.set("socketio", io);
 });
 
