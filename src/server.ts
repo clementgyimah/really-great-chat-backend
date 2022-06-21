@@ -101,7 +101,7 @@ app.use(express.static(staticDir));
 const server = http.createServer(app);
 const io = new SocketIo(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "https://really-great-chat-frontend.herokuapp.com"],
   },
 });
 
